@@ -14,6 +14,7 @@ from app.crud.charity_project import charity_project_crud
 from app.schemas.charity_project import (CharityProjectBase,
                                          CharityProjectCreate,
                                          CharityProjectDB, CharityProjectUpdate)
+from app.services.investment import investing_magic
 
 router = APIRouter()
 
@@ -40,6 +41,8 @@ async def create_new_charity_project(
 ):
     await check_charity_project_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(charity_project, session)
+    await investing_magic(session)
+    await session.refresh(new_project)
     return new_project
 
 
@@ -83,5 +86,7 @@ async def update_charity_project(
             charity_project.close_date = datetime.now()
     
     charity_project = await charity_project_crud.update(charity_project, obj_in, session)
+    await investing_magic(session)
+    await session.refresh(charity_project)
 
     return charity_project
