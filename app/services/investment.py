@@ -1,19 +1,14 @@
-from typing import Optional
 from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.charity_project import charity_project_crud
-from app.crud.donation import donation_crud
-
-from app.models import Donation, CharityProject
+from app.models import CharityProject, Donation
 
 
 async def investing_magic(
-        session: AsyncSession   
+        session: AsyncSession
 ):
-    print('This is investment magic')
     opened_projects = await session.execute(
         select(CharityProject).where(CharityProject.fully_invested == 0)
     )
@@ -72,14 +67,4 @@ async def investing_magic(
 
         opened_donation = opened_donations.scalars().first()
 
-        # session.add(opened_project)
-        # session.add(opened_donation)
-
-
-        # await session.commit()
-
-        # await session.refresh(opened_project)
-        # await session.refresh(opened_donation)
-
-
-    return 'Magic'
+    return 'Investment Done'

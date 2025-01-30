@@ -1,15 +1,10 @@
-# app/crud/meeting_room.py
-from typing import Optional
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 from app.crud.base import CRUDBase
 from app.models import Donation, User
 
 
-# Создаем новый класс, унаследованный от CRUDBase.
 class CRUDDonation(CRUDBase):
     async def get_by_user(
         self,

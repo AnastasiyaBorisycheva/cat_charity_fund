@@ -1,9 +1,8 @@
+from datetime import datetime
 from typing import Optional
-from datetime import datetime, timedelta
 
-from pydantic import BaseModel, Field, validator, root_validator
-from pydantic.types import PositiveInt, NonNegativeInt
-
+from pydantic import BaseModel, Field
+from pydantic.types import NonNegativeInt, PositiveInt
 
 CREATE_DATE = (datetime.now()).isoformat(timespec='seconds')
 
