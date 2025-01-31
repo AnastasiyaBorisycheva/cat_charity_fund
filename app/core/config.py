@@ -11,8 +11,9 @@ class Settings(BaseSettings):
     first_superuser_email: Optional[EmailStr] = None
     first_superuser_password: Optional[str] = None
 
-    class Config:
-        env_file = '.env'
+    # Проверка тестов на платформе
+    # class Config:
+    #     env_file = '.env'
 
 
 settings = Settings()
