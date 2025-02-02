@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +20,16 @@ async def get_open_project_donation(session: AsyncSession):
     opened_donation = opened_donations.scalars().first()
 
     return opened_project, opened_donation
+
+
+async def check_invested_amount(
+    invest_obj: Union[CharityProject, Donation]
+):
+    if invest_obj.invested_amount == invest_obj.full_amount:
+        setattr(invest_obj, 'fully_invested', True)
+        setattr(invest_obj, 'close_date', datetime.now())
+
+    return invest_obj
 
 
 async def investing_magic(
@@ -50,13 +61,8 @@ async def investing_magic(
         setattr(opened_project, 'invested_amount', new_project_amount)
         setattr(opened_donation, 'invested_amount', new_donation_amount)
 
-        if opened_project.invested_amount == opened_project.full_amount:
-            setattr(opened_project, 'fully_invested', True)
-            setattr(opened_project, 'close_date', datetime.now())
-
-        if opened_donation.invested_amount == opened_donation.full_amount:
-            setattr(opened_donation, 'fully_invested', True)
-            setattr(opened_donation, 'close_date', datetime.now())
+        opened_project = await check_invested_amount(opened_project)
+        opened_donation = await check_invested_amount(opened_donation)
 
         session.add(opened_project)
         session.add(opened_donation)
