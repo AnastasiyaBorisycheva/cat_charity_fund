@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,12 +73,11 @@ async def update_charity_project(
 ):
     await check_charity_project_name_duplicate(obj_in.name, session)
     charity_project = await check_charity_project_closed(project_id, session)
-    print(charity_project.__dict__)
 
     if obj_in.full_amount is not None:
         if obj_in.full_amount < charity_project.invested_amount:
             raise HTTPException(
-                status_code=422,
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail=(f'Нельзя уменьшить сумму проекта ниже'
                         f' {charity_project.invested_amount}')
             )

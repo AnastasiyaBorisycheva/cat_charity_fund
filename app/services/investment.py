@@ -6,9 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import CharityProject, Donation
 
 
-async def investing_magic(
-        session: AsyncSession
-):
+async def get_open_project_donation(session: AsyncSession):
+
     opened_projects = await session.execute(
         select(CharityProject).where(CharityProject.fully_invested == 0)
     )
@@ -19,6 +18,14 @@ async def investing_magic(
     )
     opened_donation = opened_donations.scalars().first()
 
+    return opened_project, opened_donation
+
+
+async def investing_magic(
+        session: AsyncSession
+):
+    opened_project, opened_donation = await get_open_project_donation(session)
+
     while opened_project is not None and opened_donation is not None:
         delta_project = (
             opened_project.full_amount - opened_project.invested_amount
@@ -28,24 +35,20 @@ async def investing_magic(
         )
 
         if delta_project > delta_donation:
-            new_project_amount = (
-                opened_project.invested_amount + delta_donation
-            )
-            setattr(opened_project, 'invested_amount', new_project_amount)
+            common_delta = delta_donation
+        else:
+            common_delta = delta_project
 
-            new_donation_amount = (
-                opened_donation.invested_amount + delta_donation
-            )
-            setattr(opened_donation, 'invested_amount', new_donation_amount)
+        new_project_amount = (
+            opened_project.invested_amount + common_delta
+        )
 
-        elif delta_project <= delta_donation:
-            new_project_amount = opened_project.invested_amount + delta_project
-            setattr(opened_project, 'invested_amount', new_project_amount)
+        new_donation_amount = (
+            opened_donation.invested_amount + common_delta
+        )
 
-            new_donation_amount = (
-                opened_donation.invested_amount + delta_project
-            )
-            setattr(opened_donation, 'invested_amount', new_donation_amount)
+        setattr(opened_project, 'invested_amount', new_project_amount)
+        setattr(opened_donation, 'invested_amount', new_donation_amount)
 
         if opened_project.invested_amount == opened_project.full_amount:
             setattr(opened_project, 'fully_invested', True)
@@ -63,16 +66,7 @@ async def investing_magic(
         await session.refresh(opened_project)
         await session.refresh(opened_donation)
 
-        opened_projects = await session.execute(
-            select(CharityProject).where(CharityProject.fully_invested == 0)
-        )
-
-        opened_project = opened_projects.scalars().first()
-
-        opened_donations = await session.execute(
-            select(Donation).where(Donation.fully_invested == 0)
-        )
-
-        opened_donation = opened_donations.scalars().first()
+        opened_project, opened_donation = await get_open_project_donation(
+            session)
 
     return 'Investment Done'
