@@ -58,8 +58,8 @@ async def investing_magic(
             opened_donation.invested_amount + common_delta
         )
 
-        setattr(opened_project, 'invested_amount', new_project_amount)
-        setattr(opened_donation, 'invested_amount', new_donation_amount)
+        opened_project.invested_amount = new_project_amount
+        opened_donation.invested_amount = new_donation_amount
 
         opened_project = await check_invested_amount(opened_project)
         opened_donation = await check_invested_amount(opened_donation)
